@@ -3,6 +3,8 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import youtube_subs
 import urllib
+import subprocess
+import pafy
 
 
 
@@ -43,7 +45,7 @@ def start(url_list):
 	
 	widget.setLayout(layout)
 	
-	okButton.clicked.connect(lambda: ok(myWidgetList))
+	okButton.clicked.connect(lambda: ok(myWidgetList,widget))
 	cancelButton.clicked.connect(cancel)
 	
 	sys.exit(app.exec_())
@@ -51,13 +53,44 @@ def start(url_list):
 
 def cancel():
 	sys.exit()
+	
+	
+	
+def clearLayout(layout):
+	while layout.count():
+		child = layout.takeAt(0)
+		if child.widget() is not None:
+			child.widget().deleteLater()
+		elif child.layout() is not None:
+			clearLayout(child.layout())
 
-def ok(myWidgetList):
+def ok(myWidgetList,myWidget):
 	to_dl_list = []
 	for i in range(len(myWidgetList)):
 		if myWidgetList[i].check.isChecked():
 			to_dl_list.append(myWidgetList[i].url)
 	print(to_dl_list)
+	print(myWidget.layout())
+	for i in reversed(range(myWidget.layout().count())): 
+		clearLayout(myWidget.layout())
+	progress_single = QProgressBar()
+	progress_group = QProgressBar()
+	progress_single.setValue(50)
+	
+	myWidget.layout().addWidget(progress_single)
+	myWidget.layout().addWidget(progress_group)
+	quitButton = QPushButton("Quit")
+	myWidget.layout().addWidget(quitButton)
+	quitButton.clicked.connect(exit_app)
+	
+	url = to_dl_list[0]
+	video = pafy.new(url)
+	best = video.getbest()
+	best.download(quiet=False)
+	
+def exit_app():
+	sys.exit()	
+	
 
 	
 
