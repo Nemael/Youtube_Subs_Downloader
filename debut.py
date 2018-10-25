@@ -5,19 +5,8 @@ import json
 import youtube_subs
 import codecs
 import GUI
+import pafy
 
-#Mettre les videos dans l'ordre
-#Mettre un treshold pour eviter les vieilles videos
-
-"""test = youtube_search("Ninja")
-just_json = test[1]
-for video in just_json:
-	print video['snippet']['title']"""
-
-#print len(just_json)
-#print(just_json[0])
-#for video in just_json:
-#	print(video['snippet']['title'])
 def get_subs_list():
 	channels_name_list = []
 	channelsId_list = []
@@ -64,19 +53,6 @@ def update_watched_videos_list(video_list_depaqued):
 	f.close()
 	print("Dans fichier fait")
 
-"""def get_videos_already_watched(video_list):
-	list_from_file = []
-	watched = []
-	f = open('watched_videos.txt','r')
-	for line in f:
-		line = line.strip("https://www.youtube.com/watch?v=")
-		list_from_file.append(line)
-	f.close()
-	for i in video_list:
-		if i in list_from_file:
-			watched.append(i)
-	return(watched)"""
-
 def get_videos_not_watched(video_list):
 	list_from_file = []
 	not_watched = []
@@ -91,7 +67,7 @@ def get_videos_not_watched(video_list):
 			not_watched.append(i)
 	return(not_watched)
 
-print("Que voulez vous faire?\n(Treshold = 1 mois\n 1) Voir la liste des nouvelles videos\n 2) Updater la liste des abonnements\n 3) Mettre toutes les videos dans watched_videos.txt\n 4) Donnez les URL a la main pour telecharger les videos\n 5) Temp")
+print("Que voulez vous faire?\n(Treshold = 1 mois\n 1) Voir la liste des nouvelles videos\n 2) Updater la liste des abonnements\n 3) Mettre toutes les videos dans watched_videos.txt\n 4) Donnez les URL a la main pour telecharger les videos")
 choix = int(input())
 if choix == 1:
 	url_list = []
@@ -111,8 +87,7 @@ if choix == 1:
 	channels_file.close()
 
 	noms = []
-	for i in range(5):
-	#for i in range(len(channelsId_list)):
+	for i in range(len(channelsId_list)):
 		print(i,channelsname_list[i])
 		res = youtube_subs.search_date_user_id(channelsId_list[i])
 		for i in range(len(res)):
@@ -126,8 +101,12 @@ if choix == 1:
 		print("    ")
 	
 	url_not_watched = get_videos_not_watched(url_list)
-	url_to_dl = GUI.start(url_not_watched)
-	update_watched_videos_list(url_to_add)
+	print("Liste:")
+	for i in range(len(url_not_watched)):
+		print("https://www.youtube.com/watch?v="+url_not_watched[i])
+	print("Total: "+str(len(url_not_watched)))
+	update_watched_videos_list(url_not_watched)
+	gui = GUI.GUI(url_not_watched,False)
 		
 elif choix == 2:
 	channels_name, channelsId = get_subs_list()
@@ -157,10 +136,7 @@ elif choix == 3:
 	channels_file.close()
 
 	noms = []
-	for i in range(5):
-	#for i in range(len(channelsId_list)):
-		#for i in range(3):
-
+	for i in range(len(channelsId_list)):
 		print(i,channelsname_list[i])
 		res = youtube_subs.search_date_user_id(channelsId_list[i])
 		for i in range(len(res)):
@@ -177,8 +153,20 @@ elif choix == 3:
 	update_watched_videos_list(url_to_add)
 
 elif choix == 4:
-	print("Pas encore mis en place")
+	print("Veuillez entrer l'url des videos que vous voulez telecharger selon cette structure:\nhttps://www.youtube.com/watch?v=ID---------, autre chose lancera le telechargement")
+	url_list = []
+	stop = 0
+	while(not stop):
+		url = str(raw_input())
+		if len(url) == 43:
+			url_list.append(url[32:])
+		else:
+			stop = 1
+	print(url_list)
+	gui = GUI.GUI(url_list,True)
 
 elif choix == 5:
-	lis = ["_TH4SNjff40","uCawbVE6xPg","s7nFjhEf55U","h0MMUYvoZ94","JEA3LaLybDs","XvTvtwykNcY","Fff8CjDBYkA","swLBI9KLpTE","_C_CEhjqulc","mvunhIMXxpM"]
-	GUI.start(lis)
+	#lis = ["l7LG15O6L2Y"]
+	lis = ["_TH4SNjff40","s7nFjhEf55U","l7LG15O6L2Y"]
+	#lis = ["_TH4SNjff40","s7nFjhEf55U","uCawbVE6xPg","_TH4SNjff40","s7nFjhEf55U","_TH4SNjff40","s7nFjhEf55U","h0MMUYvoZ94"]
+	gui = GUI.GUI(lis,True)
